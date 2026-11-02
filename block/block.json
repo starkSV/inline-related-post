@@ -1,0 +1,32 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "inline-related-post/related-post",
+	"version": "0.3.2",
+	"title": "Related Post",
+	"category": "widgets",
+	"icon": "excerpt-view",
+	"description": "Place hand-picked related article cards inside an article.",
+	"keywords": [ "related", "article", "read more", "link" ],
+	"textdomain": "inline-related-post",
+	"attributes": {
+		"mode": { "type": "string", "enum": [ "single", "multiple" ], "default": "single" },
+		"layout": { "type": "string", "enum": [ "stacked", "grid", "compact" ], "default": "stacked" },
+		"postIds": { "type": "array", "items": { "type": "integer" }, "default": [] },
+		"heading": { "type": "string", "default": "Related" },
+		"showExcerpt": { "type": "boolean", "default": true },
+		"showAuthor": { "type": "boolean", "default": true },
+		"showDate": { "type": "boolean", "default": true },
+		"showImage": { "type": "boolean", "default": true },
+		"cardBackground": { "type": "string" },
+		"cardText": { "type": "string" },
+		"headingColor": { "type": "string" }
+	},
+	"supports": {
+		"html": false
+	},
+	"editorScript": "file:./editor.js",
+	"editorStyle": "file:./editor.css",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}
