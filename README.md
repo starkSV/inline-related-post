@@ -103,7 +103,7 @@ If you remove the plugin, cards stop appearing on your site. The block markup st
 
 ## Testing so far
 
-The plugin has been used on one live site (TechLatest) and tested on a local WordPress Playground site running the latest WordPress with PHP 8.3. The settings page has so far only been tested on that local site. The plugin has no automated tests, and it hasn't been tried with older WordPress or PHP versions, with other themes beyond those two sites, or in the site editor. Please open an issue if you find a problem.
+The plugin has been used on one live site (TechLatest) and tested on a local WordPress Playground site running the latest WordPress with PHP 8.3. That includes the settings page. The plugin has no automated tests, and it hasn't been tried with older WordPress or PHP versions, with other themes beyond those two sites, or in the site editor. Please open an issue if you find a problem.
 
 ## Author
 
