@@ -10,6 +10,7 @@
 
 	const API_PATH = '/inline-related-post/v1/posts';
 	const TEXT_DOMAIN = 'inline-related-post';
+	const SITE = window.irpSettings;
 
 	function Segmented( { label, value, options, onChange } ) {
 		return h(
@@ -30,7 +31,7 @@
 		);
 	}
 
-	function PostSearch( { excludeIds, onPick } ) {
+	function PostSearch( { excludeIds, keepSearch, onPick } ) {
 		const [ term, setTerm ] = useState( '' );
 		const [ results, setResults ] = useState( [] );
 		const [ loading, setLoading ] = useState( true );
@@ -73,7 +74,8 @@
 		} else if ( failed ) {
 			body = h( 'p', { className: 'irp-empty' }, __( 'Search failed. Please try again.', TEXT_DOMAIN ) );
 		} else if ( ! visible.length ) {
-			body = h( 'p', { className: 'irp-empty' }, __( 'No posts found.', TEXT_DOMAIN ) );
+			const message = results.length ? __( 'All of these posts are already selected.', TEXT_DOMAIN ) : __( 'No posts found.', TEXT_DOMAIN );
+			body = h( 'p', { className: 'irp-empty' }, message );
 		} else {
 			body = h(
 				'div',
@@ -85,7 +87,10 @@
 							key: post.id,
 							onClick: () => {
 								onPick( post.id );
-								setTerm( '' );
+								// Several posts often come from one search in Multiple mode.
+								if ( ! keepSearch ) {
+									setTerm( '' );
+								}
 							},
 						},
 						h( 'span', null, post.title ),
@@ -161,7 +166,10 @@
 	}
 
 	function Edit( { attributes, setAttributes, isSelected } ) {
-		const { mode, layout, postIds, heading, showExcerpt, showAuthor, showDate, showImage, cardBackground, cardText, headingColor } = attributes;
+		const { postIds, heading, accentColor, cardBackground, cardText, headingColor } = attributes;
+		// Blocks saved before site defaults existed have no mode or layout of their own.
+		const mode = attributes.mode ?? 'single';
+		const layout = attributes.layout ?? 'stacked';
 		const isMultiple = mode === 'multiple';
 		const isCompact = isMultiple && layout === 'compact';
 		const activeIds = isMultiple ? postIds : postIds.slice( 0, 1 );
@@ -173,6 +181,14 @@
 		useEffect( () => {
 			if ( isSelected && ! postIds.length ) {
 				wp.data.dispatch( 'core/edit-post' )?.openGeneralSidebar( 'edit-post/block' );
+			}
+		}, [] );
+
+		// A new block starts from the site's mode and layout, then keeps its own.
+		useEffect( () => {
+			if ( attributes.mode === undefined && ! postIds.length ) {
+				wp.data.dispatch( 'core/block-editor' ).__unstableMarkNextChangeAsNotPersistent?.();
+				setAttributes( { mode: SITE.mode, layout: SITE.layout } );
 			}
 		}, [] );
 
@@ -203,18 +219,36 @@
 		const emptyPlaceholder = ( message ) =>
 			h( Placeholder, { icon: 'excerpt-view', label: __( 'Related Post', TEXT_DOMAIN ), instructions: message } );
 
+		const siteDefaultNote = ( key ) =>
+			attributes[ key ] === undefined
+				? h( 'small', { className: 'irp-option__note' }, __( 'Site default', TEXT_DOMAIN ) )
+				: h(
+						Button,
+						{
+							variant: 'link',
+							className: 'irp-option__reset',
+							onClick: () => setAttributes( { [ key ]: undefined } ),
+						},
+						__( 'Reset to site default', TEXT_DOMAIN )
+				  );
+
 		const checkbox = ( label, key, extra ) =>
 			h(
-				CheckboxControl,
-				Object.assign(
-					{
-						__nextHasNoMarginBottom: true,
-						label,
-						checked: attributes[ key ],
-						onChange: ( value ) => setAttributes( { [ key ]: value } ),
-					},
-					extra
-				)
+				'div',
+				{ className: 'irp-option' },
+				h(
+					CheckboxControl,
+					Object.assign(
+						{
+							__nextHasNoMarginBottom: true,
+							label,
+							checked: attributes[ key ] ?? SITE[ key ],
+							onChange: ( value ) => setAttributes( { [ key ]: value } ),
+						},
+						extra
+					)
+				),
+				siteDefaultNote( key )
 			);
 
 		return h(
@@ -253,7 +287,7 @@
 							canReorder: isMultiple,
 							onChange: ( ids ) => setAttributes( { postIds: ids } ),
 						} ),
-					h( PostSearch, { excludeIds: activeIds, onPick: pickPost } )
+					h( PostSearch, { excludeIds: activeIds, keepSearch: isMultiple, onPick: pickPost } )
 				),
 				h(
 					PanelBody,
@@ -263,9 +297,10 @@
 						__nextHasNoMarginBottom: true,
 						label: __( 'Heading', TEXT_DOMAIN ),
 						help: __( 'Leave empty to hide the heading.', TEXT_DOMAIN ),
-						value: heading,
+						value: heading ?? SITE.heading,
 						onChange: ( value ) => setAttributes( { heading: value } ),
 					} ),
+					h( 'div', { className: 'irp-option' }, siteDefaultNote( 'heading' ) ),
 					h( 'div', { style: { height: 16 } } ),
 					checkbox( __( 'Show Excerpt', TEXT_DOMAIN ), 'showExcerpt', {
 						disabled: isCompact,
@@ -279,6 +314,11 @@
 					title: __( 'Colours', TEXT_DOMAIN ),
 					initialOpen: false,
 					colorSettings: [
+						{
+							label: __( 'Accent', TEXT_DOMAIN ),
+							value: accentColor,
+							onChange: ( value ) => setAttributes( { accentColor: value } ),
+						},
 						{
 							label: __( 'Card background', TEXT_DOMAIN ),
 							value: cardBackground,
@@ -295,6 +335,7 @@
 							onChange: ( value ) => setAttributes( { headingColor: value } ),
 						},
 					],
+					children: h( 'p', { className: 'irp-empty' }, __( 'Colours left empty follow the site’s settings.', TEXT_DOMAIN ) ),
 				} )
 			),
 			h(

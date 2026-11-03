@@ -64,6 +64,23 @@
 	color: #757575;
 }
 
+.irp-option {
+	margin-bottom: 8px;
+}
+
+.irp-option__note {
+	display: block;
+	margin-left: 28px;
+	color: #757575;
+	font-size: 11px;
+}
+
+.irp-option__reset.components-button {
+	display: block;
+	margin-left: 28px;
+	font-size: 11px;
+}
+
 .irp-editor-notice {
 	margin: 0 0 12px;
 }

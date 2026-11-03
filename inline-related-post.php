@@ -3,10 +3,11 @@
  * Plugin Name:       Inline Related Post
  * Plugin URI:        https://github.com/starkSV/inline-related-post
  * Description:       A "Related Post" block for placing hand-picked related article cards inside an article.
- * Version:           0.3.2
+ * Version:           0.4.2
  * Requires at least: 6.3
  * Requires PHP:      7.4
  * Author:            Shekhar Vaidya
+ * Author URI:        https://github.com/starkSV
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       inline-related-post
@@ -19,6 +20,8 @@ defined( 'ABSPATH' ) || exit;
 // Posts listed before anything is typed, and the most a search returns.
 const IRP_RECENT_LIMIT = 5;
 const IRP_SEARCH_LIMIT = 50;
+
+require_once __DIR__ . '/includes/settings.php';
 
 add_action( 'init', 'irp_register_block' );
 add_action( 'rest_api_init', 'irp_register_routes' );

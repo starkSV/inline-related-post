@@ -18,5 +18,5 @@ return array(
 		'wp-server-side-render',
 		'wp-url',
 	),
-	'version'      => '0.3.2',
+	'version'      => '0.4.2',
 );
